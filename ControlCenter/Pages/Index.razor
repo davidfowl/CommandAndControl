@@ -1,0 +1,69 @@
+﻿@page "/"
+@using Contracts
+@inject AgentManager Manager
+
+<PageTitle>Agents</PageTitle>
+
+<h1>Agent Dashboard</h1>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Agent</th>
+            <th>Temp. (F)</th>
+            <th>Operations</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var (id, agent) in Manager.Agents)
+        {
+            <tr>
+                <td>@id</td>
+                <td>
+                    @if (_lastTemperature.TryGetValue(id, out var result))
+                    {
+                        if (result == double.MinValue)
+                        {
+                            <img src="images/loading_spinner.gif" width="32" height="30" alt="loading" />
+                        }
+                        else
+                        {
+                            @result
+                        }
+                    }
+                </td>
+                <td>
+                    <button onclick="@(()=> CheckTemperature(id, agent))">Check temperature</button>
+                    <button onclick="@(()=> Shutdown(agent))">Shutdown</button>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+
+@code {
+    Dictionary<string, double> _lastTemperature = new();
+
+    protected override void OnInitialized()
+    {
+        Manager.Agents.CollectionChanged += (_, _) => InvokeAsync(() => StateHasChanged());
+    }
+
+    async Task CheckTemperature(string id, IAgent agent)
+    {
+        _lastTemperature[id] = double.MinValue;
+
+        StateHasChanged();
+
+        var temperature = await agent.GetTemperature();
+        _lastTemperature[id] = temperature;
+
+        StateHasChanged();
+    }
+
+    Task Shutdown(IAgent agent)
+    {
+        return agent.Shutdown();
+    }
+}
