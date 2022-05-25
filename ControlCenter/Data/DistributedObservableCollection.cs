@@ -1,24 +1,26 @@
 ﻿
 using Orleans;
 
-public class DistributedObservableCollection<T> : ICollectionObserver
+public class DistributedObservableCollection<T>
 {
     private readonly ICollectionGrain<T> _collectionGrain;
     private readonly IGrainFactory _grainFactory;
-    private ICollectionObserver? _collectionObserver;
+    private ICollectionObserver? _collectionObserverReference;
     private Func<Task>? _changed;
+    private readonly Observer _observer;
 
     public DistributedObservableCollection(IGrainFactory grainFactory, long key)
     {
         _grainFactory = grainFactory;
         _collectionGrain = grainFactory.GetGrain<ICollectionGrain<T>>(key);
+        _observer = new Observer(this);
     }
 
     public Task AddItem(T item) => _collectionGrain.AddItem(item);
     public Task RemoveItem(T item) => _collectionGrain.RemoveItem(item);
     public Task<T[]> GetItems() => _collectionGrain.GetItems();
 
-    Task ICollectionObserver.OnCollectionChanged()
+    private Task OnCollectionChanged()
     {
         return _changed?.Invoke() ?? Task.CompletedTask;
     }
@@ -27,10 +29,10 @@ public class DistributedObservableCollection<T> : ICollectionObserver
     {
         _changed += onChanged;
 
-        if (_collectionObserver is null)
+        if (_collectionObserverReference is null)
         {
-            _collectionObserver = await _grainFactory.CreateObjectReference<ICollectionObserver>(this);
-            await _collectionGrain.Subscribe(_collectionObserver);
+            _collectionObserverReference = await _grainFactory.CreateObjectReference<ICollectionObserver>(_observer);
+            await _collectionGrain.Subscribe(_collectionObserverReference);
         }
 
         return new Disposable(() =>
@@ -41,10 +43,21 @@ public class DistributedObservableCollection<T> : ICollectionObserver
 
     public async ValueTask DisposeAsync()
     {
-        if (_collectionObserver is not null)
+        if (_collectionObserverReference is not null)
         {
-            await _collectionGrain.Unsubscribe(_collectionObserver);
+            await _collectionGrain.Unsubscribe(_collectionObserverReference);
         }
+    }
+
+    private class Observer : ICollectionObserver
+    {
+        private readonly DistributedObservableCollection<T> _parent;
+        public Observer(DistributedObservableCollection<T> parent)
+        {
+            _parent = parent;
+        }
+
+        public Task OnCollectionChanged() => _parent.OnCollectionChanged();
     }
 
     private class Disposable : IDisposable
