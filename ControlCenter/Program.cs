@@ -9,6 +9,7 @@ builder.Host.UseOrleans(builder => builder.UseLocalhostClustering());
 // Add services to the container.
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
+builder.Services.AddSingleton<IDistirbutedCollectionFactory, DistirbutedCollectionFactory>();
 builder.Services.AddSingleton<AgentManager>();
 
 var app = builder.Build();

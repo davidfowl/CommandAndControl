@@ -53,14 +53,14 @@
 
     protected override async Task OnInitializedAsync()
     {
-        _ = await Manager.SubscribeAsync(async () =>
+        _ = await Manager.Collection.SubscribeAsync(async () =>
         {
-            agents = await Manager.GetAgents();
+            agents = await Manager.Collection.GetItems();
 
             await InvokeAsync(() => StateHasChanged());
         });
 
-        agents = await Manager.GetAgents();
+        agents = await Manager.Collection.GetItems();
 
         await base.OnInitializedAsync();
     }

@@ -15,14 +15,14 @@ public class AgentHub : Hub<IAgent>
 
     public override Task OnConnectedAsync()
     {
-        _agentManager.AddAgent(Context.ConnectionId);
+        _agentManager.Collection.AddItem(Context.ConnectionId);
 
         return base.OnConnectedAsync();
     }
 
     public override Task OnDisconnectedAsync(Exception? exception)
     {
-        _agentManager.RemoveAgent(Context.ConnectionId);
+        _agentManager.Collection.RemoveItem(Context.ConnectionId);
 
         return base.OnDisconnectedAsync(exception);
     }
