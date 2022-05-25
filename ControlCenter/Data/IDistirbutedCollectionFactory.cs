@@ -3,7 +3,7 @@ using Orleans;
 
 public interface IDistirbutedCollectionFactory
 {
-    DistributedObservableCollection<T> Create<T>(long key);
+    DistributedObservableCollection<T> CreateObservableCollection<T>(long key);
 }
 
 public class DistirbutedCollectionFactory : IDistirbutedCollectionFactory
@@ -14,7 +14,7 @@ public class DistirbutedCollectionFactory : IDistirbutedCollectionFactory
         _grainFactory = grainFactory;
     }
 
-    public DistributedObservableCollection<T> Create<T>(long key)
+    public DistributedObservableCollection<T> CreateObservableCollection<T>(long key)
     {
         return new DistributedObservableCollection<T>(_grainFactory, key);
     }
