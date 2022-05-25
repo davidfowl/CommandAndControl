@@ -1,7 +1,4 @@
-﻿using Contracts;
-using ControlCenter.Hubs;
-using Microsoft.AspNetCore.SignalR;
-using Orleans;
+﻿using Orleans;
 using Orleans.Concurrency;
 
 public class AgentManager : IAgentEventSubscriber, IAsyncDisposable
@@ -10,12 +7,10 @@ public class AgentManager : IAgentEventSubscriber, IAsyncDisposable
     private readonly IGrainFactory _grainFactory;
     private Func<Task> _agentsChanged = () => { return Task.CompletedTask; };
     private IAgentEventSubscriber? _subscriberProxy;
-    private IHubContext<AgentHub> _hubContext;
 
-    public AgentManager(IGrainFactory grainFactory, IHubContext<AgentHub> hubContext)
+    public AgentManager(IGrainFactory grainFactory)
     {
         _grainFactory = grainFactory;
-        _hubContext = hubContext;
         _agentGrain = grainFactory.GetGrain<IAgentGrain>(0);
     }
 
@@ -29,11 +24,9 @@ public class AgentManager : IAgentEventSubscriber, IAsyncDisposable
         return _agentGrain.RemoveAgent(connectionId);
     }
 
-    public async Task<(string, IAgent)[]> GetAgents()
+    public async Task<string[]> GetAgents()
     {
-        var agents = await _agentGrain.GetAgents();
-
-        return agents.Select(a => (a, AgentProxy.Create(_hubContext.Clients.Single(a)))).ToArray();
+        return await _agentGrain.GetAgents();
     }
 
     public Task OnAgentsChanged()
@@ -41,7 +34,7 @@ public class AgentManager : IAgentEventSubscriber, IAsyncDisposable
         return _agentsChanged.Invoke();
     }
 
-    public async Task<IAsyncDisposable> SubscribeAsync(Func<Task> onChanged)
+    public async Task<IDisposable> SubscribeAsync(Func<Task> onChanged)
     {
         _agentsChanged += onChanged;
 
@@ -51,7 +44,7 @@ public class AgentManager : IAgentEventSubscriber, IAsyncDisposable
             await _agentGrain.Subscribe(_subscriberProxy);
         }
 
-        return new AsyncDisposable(async () =>
+        return new AsyncDisposable(() =>
         {
             _agentsChanged -= onChanged;
         });
@@ -65,39 +58,18 @@ public class AgentManager : IAgentEventSubscriber, IAsyncDisposable
         }
     }
 
-    private class AsyncDisposable : IAsyncDisposable
+    private class AsyncDisposable : IDisposable
     {
-        private readonly Func<ValueTask> _callback;
-        public AsyncDisposable(Func<ValueTask> callback)
+        private readonly Action _callback;
+        public AsyncDisposable(Action callback)
         {
             _callback = callback;
         }
-        public ValueTask DisposeAsync()
-        {
-            return _callback();
-        }
-    }
 
-    // Wrapper to workaround bug in signalr
-    private class AgentProxy : IAgent
-    {
-        private readonly ISingleClientProxy _clientProxy;
-        public AgentProxy(ISingleClientProxy clientProxy)
+        public void Dispose()
         {
-            _clientProxy = clientProxy;
+            _callback();
         }
-
-        public Task<double> GetTemperature()
-        {
-            return _clientProxy.InvokeAsync<double>(nameof(GetTemperature));
-        }
-
-        public Task Shutdown()
-        {
-            return _clientProxy.SendAsync(nameof(Shutdown));
-        }
-
-        public static IAgent Create(ISingleClientProxy clientProxy) => new AgentProxy(clientProxy);
     }
 }
 

@@ -1,6 +1,10 @@
 ﻿@page "/"
 @using Contracts
+@using ControlCenter.Hubs
+@using Microsoft.AspNetCore.SignalR
+
 @inject AgentManager Manager
+@inject IHubContext<AgentHub> HubContext
 
 <PageTitle>Agents</PageTitle>
 
@@ -15,8 +19,9 @@
         </tr>
     </thead>
     <tbody>
-        @foreach (var (id, agent) in agents)
+        @foreach (var id in agents)
         {
+            var agent = AgentProxy.Create(HubContext.Clients.Single(id));
             <tr>
                 <td>@id</td>
                 <td>
@@ -44,7 +49,7 @@
 
 @code {
     Dictionary<string, double> _lastTemperature = new();
-    (string, IAgent)[] agents = Array.Empty<(string, IAgent)>();
+    string[] agents = Array.Empty<string>();
 
     protected override async Task OnInitializedAsync()
     {
