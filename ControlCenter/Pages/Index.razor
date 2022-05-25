@@ -15,7 +15,7 @@
         </tr>
     </thead>
     <tbody>
-        @foreach (var (id, agent) in Manager.Agents)
+        @foreach (var (id, agent) in agents)
         {
             <tr>
                 <td>@id</td>
@@ -44,10 +44,20 @@
 
 @code {
     Dictionary<string, double> _lastTemperature = new();
+    (string, IAgent)[] agents = Array.Empty<(string, IAgent)>();
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        Manager.Agents.CollectionChanged += (_, _) => InvokeAsync(() => StateHasChanged());
+        _ = await Manager.SubscribeAsync(async () =>
+        {
+            agents = await Manager.GetAgents();
+
+            await InvokeAsync(() => StateHasChanged());
+        });
+
+        agents = await Manager.GetAgents();
+
+        await base.OnInitializedAsync();
     }
 
     async Task CheckTemperature(string id, IAgent agent)

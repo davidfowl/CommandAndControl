@@ -1,6 +1,10 @@
 using ControlCenter.Hubs;
+using Orleans;
+using Orleans.Hosting;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Host.UseOrleans(builder => builder.UseLocalhostClustering());
 
 // Add services to the container.
 builder.Services.AddRazorPages();
