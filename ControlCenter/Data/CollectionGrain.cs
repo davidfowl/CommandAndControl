@@ -1,6 +1,8 @@
 ﻿using Orleans;
 using Orleans.Concurrency;
 
+namespace Orleans.Collections;
+
 [Reentrant]
 public class CollectionGrain<T> : Grain, ICollectionGrain<T>
 {

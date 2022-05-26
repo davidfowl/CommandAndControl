@@ -1,15 +1,15 @@
 ﻿
 using Orleans;
 
-public interface IDistirbutedCollectionFactory
+public interface IDistributedCollectionFactory
 {
     DistributedObservableCollection<T> CreateObservableCollection<T>(long key);
 }
 
-public class DistirbutedCollectionFactory : IDistirbutedCollectionFactory
+public class DistributedCollectionFactory : IDistributedCollectionFactory
 {
     private readonly IGrainFactory _grainFactory;
-    public DistirbutedCollectionFactory(IGrainFactory grainFactory)
+    public DistributedCollectionFactory(IGrainFactory grainFactory)
     {
         _grainFactory = grainFactory;
     }

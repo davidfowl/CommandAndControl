@@ -1,5 +1,7 @@
 ﻿using Orleans;
 
+namespace Orleans.Collections;
+
 public interface ICollectionGrain<T> : IGrainWithIntegerKey
 {
     Task AddItem(T item);

@@ -2,15 +2,10 @@
 
 public class AgentManager
 {
-    public AgentManager(IDistirbutedCollectionFactory factory)
+    public AgentManager(IDistributedCollectionFactory factory)
     {
         Collection = factory.CreateObservableCollection<string>(0);
     }
 
     public DistributedObservableCollection<string> Collection { get; }
-}
-
-class StringCollection : CollectionGrain<string>
-{
-
 }

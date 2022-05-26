@@ -1,5 +1,6 @@
 ﻿
 using Orleans;
+using Orleans.Collections;
 
 public class DistributedObservableCollection<T>
 {
