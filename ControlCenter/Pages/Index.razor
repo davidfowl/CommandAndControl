@@ -1,6 +1,10 @@
 ﻿@page "/"
 @using Contracts
+@using ControlCenter.Hubs
+@using Microsoft.AspNetCore.SignalR
+
 @inject AgentManager Manager
+@inject IHubContext<AgentHub> HubContext
 
 <PageTitle>Agents</PageTitle>
 
@@ -15,8 +19,9 @@
         </tr>
     </thead>
     <tbody>
-        @foreach (var (id, agent) in Manager.Agents)
+        @foreach (var id in agents)
         {
+            var agent = AgentProxy.Create(HubContext.Clients.Single(id));
             <tr>
                 <td>@id</td>
                 <td>
@@ -44,10 +49,20 @@
 
 @code {
     Dictionary<string, double> _lastTemperature = new();
+    string[] agents = Array.Empty<string>();
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        Manager.Agents.CollectionChanged += (_, _) => InvokeAsync(() => StateHasChanged());
+        _ = await Manager.Collection.SubscribeAsync(async () =>
+        {
+            agents = await Manager.Collection.GetItems();
+
+            await InvokeAsync(() => StateHasChanged());
+        });
+
+        agents = await Manager.Collection.GetItems();
+
+        await base.OnInitializedAsync();
     }
 
     async Task CheckTemperature(string id, IAgent agent)

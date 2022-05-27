@@ -1,11 +1,16 @@
 using ControlCenter.Hubs;
+using Orleans;
+using Orleans.Collections;
+using Orleans.Hosting;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Host.UseOrleans(builder => builder.UseLocalhostClustering());
 
 // Add services to the container.
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
-builder.Services.AddSignalR(o => o.MaximumParallelInvocationsPerClient = 2);
+builder.Services.AddSingleton<IDistributedCollectionFactory, DistributedCollectionFactory>();
 builder.Services.AddSingleton<AgentManager>();
 
 var app = builder.Build();

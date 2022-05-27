@@ -1,7 +1,11 @@
-﻿using Contracts;
-using System.Collections.ObjectModel;
+﻿using Orleans.Collections;
 
 public class AgentManager
 {
-    public ObservableCollection<(string, IAgent)> Agents { get; } = new();
+    public AgentManager(IDistributedCollectionFactory factory)
+    {
+        Collection = factory.CreateObservableCollection<string>(0);
+    }
+
+    public DistributedObservableCollection<string> Collection { get; }
 }
