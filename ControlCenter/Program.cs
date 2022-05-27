@@ -1,5 +1,6 @@
 using ControlCenter.Hubs;
 using Orleans;
+using Orleans.Collections;
 using Orleans.Hosting;
 
 var builder = WebApplication.CreateBuilder(args);

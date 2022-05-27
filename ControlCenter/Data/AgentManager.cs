@@ -1,4 +1,4 @@
-﻿using Orleans;
+﻿using Orleans.Collections;
 
 public class AgentManager
 {

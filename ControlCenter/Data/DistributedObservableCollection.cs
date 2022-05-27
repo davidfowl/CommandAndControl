@@ -1,6 +1,4 @@
-﻿
-using Orleans;
-using Orleans.Collections;
+﻿namespace Orleans.Collections;
 
 public class DistributedObservableCollection<T>
 {

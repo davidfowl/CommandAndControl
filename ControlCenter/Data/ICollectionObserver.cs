@@ -1,4 +1,4 @@
-﻿using Orleans;
+﻿namespace Orleans.Collections;
 
 public interface ICollectionObserver : IGrainObserver
 {
