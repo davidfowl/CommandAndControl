@@ -17,7 +17,7 @@
     <tbody>
         @foreach (var (id, agent) in Manager.Agents)
         {
-            <tr>
+            <tr @key="@id">
                 <td>@id</td>
                 <td>
                     @if (_lastTemperature.TryGetValue(id, out var result))
