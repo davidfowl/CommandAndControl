@@ -6,6 +6,7 @@ using System.Runtime.InteropServices;
 
 var connection = new HubConnectionBuilder()
                     .WithUrl("https://localhost:7177/agent")
+                    .WithAutomaticReconnect()
                     .Build();
 
 var loggerFactory = LoggerFactory.Create(logging =>
