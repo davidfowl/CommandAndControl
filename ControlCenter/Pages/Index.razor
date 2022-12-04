@@ -47,7 +47,7 @@
 
     protected override void OnInitialized()
     {
-        Manager.Agents.CollectionChanged += (_, _) => InvokeAsync(() => StateHasChanged());
+        Manager.StateChanged += (_, _) => InvokeAsync(() => StateHasChanged());
     }
 
     async Task CheckTemperature(string id, IAgent agent)
